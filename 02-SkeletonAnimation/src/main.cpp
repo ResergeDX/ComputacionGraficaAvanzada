@@ -81,8 +81,23 @@ Model modelDartLegoRightHand;
 Model modelDartLegoLeftLeg;
 Model modelDartLegoRightLeg;
 // Model animate instance
+
+
 // Mayow
 Model mayowModelAnimate;
+
+//
+Model cyborgModelAnimate;
+
+Model LaraModelAnimate;
+
+
+//Buzz
+Model buzzHead;
+Model buzzTorso;
+Model buzzArmLeft;
+Model buzzForeArmLeft;
+Model buzzHandLeft;
 
 GLuint textureCespedID, textureWallID, textureWindowID, textureHighwayID, textureLandingPadID;
 GLuint skyboxTextureID;
@@ -95,12 +110,12 @@ GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
 
-std::string fileNames[6] = { "../Textures/mp_bloodvalley/blood-valley_ft.tga",
-		"../Textures/mp_bloodvalley/blood-valley_bk.tga",
-		"../Textures/mp_bloodvalley/blood-valley_up.tga",
-		"../Textures/mp_bloodvalley/blood-valley_dn.tga",
-		"../Textures/mp_bloodvalley/blood-valley_rt.tga",
-		"../Textures/mp_bloodvalley/blood-valley_lf.tga" };
+std::string fileNames[6] = { "../Textures/Stormy/stormydays_ft.tga",
+		"../Textures/Stormy/stormydays_bk.tga",
+		"../Textures/Stormy/stormydays_up.tga",
+		"../Textures/Stormy/stormydays_dn.tga",
+		"../Textures/Stormy/stormydays_rt.tga",
+		"../Textures/Stormy/stormydays_lf.tga" };
 
 bool exitApp = false;
 int lastMousePosX, offsetX = 0;
@@ -115,7 +130,18 @@ glm::mat4 modelMatrixAircraft = glm::mat4(1.0);
 glm::mat4 modelMatrixDart = glm::mat4(1.0f);
 glm::mat4 modelMatrixMayow = glm::mat4(1.0f);
 
+glm::mat4 modelMatrixBuzz = glm::mat4(1.0f);
+
+glm::mat4 modelMatrixCyborg = glm::mat4(1.0f);
+
+glm::mat4 modelMatrixLara = glm::mat4(1.0f);
+int animaLara = 0;
+
+
 float rotDartHead = 0.0, rotDartLeftArm = 0.0, rotDartLeftHand = 0.0, rotDartRightArm = 0.0, rotDartRightHand = 0.0, rotDartLeftLeg = 0.0, rotDartRightLeg = 0.0;
+float rotBuzzArmLeft = 0.0, rotBuzzForeArmLeft = 0.0, rotBuzzHandLeft=0.0;
+
+
 int modelSelected = 0;
 bool enableCountSelected = true;
 
@@ -291,6 +317,24 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	//Mayow
 	mayowModelAnimate.loadModel("../models/mayow/personaje2.fbx");
 	mayowModelAnimate.setShader(&shaderMulLighting);
+
+	cyborgModelAnimate.loadModel("../models/cyborg/Cyborg_T.fbx");
+	cyborgModelAnimate.setShader(&shaderMulLighting);
+
+	LaraModelAnimate.loadModel("../models/Lara/Lara.fbx");
+	LaraModelAnimate.setShader(&shaderMulLighting);
+
+	//BuzzLightyear
+	buzzHead.loadModel("../models/buzz/buzzlightyHead.obj");
+	buzzHead.setShader(&shaderMulLighting);
+	buzzTorso.loadModel("../models/buzz/buzzlightyTorso.obj");
+	buzzTorso.setShader(&shaderMulLighting);
+	buzzArmLeft.loadModel("../models/buzz/buzzlightyLeftArm.obj");
+	buzzArmLeft.setShader(&shaderMulLighting);
+	buzzForeArmLeft.loadModel("../models/buzz/buzzlightyLeftForearm.obj");
+	buzzForeArmLeft.setShader(&shaderMulLighting);
+	buzzHandLeft.loadModel("../models/buzz/buzzlightyLeftHand.obj");
+	buzzHandLeft.setShader(&shaderMulLighting);
 
 	camera->setPosition(glm::vec3(0.0, 3.0, 4.0));
 
@@ -529,7 +573,8 @@ void destroy() {
 
 	// Custom objects animate
 	mayowModelAnimate.destroy();
-
+	cyborgModelAnimate.destroy();
+	LaraModelAnimate.destroy();
 	// Textures Delete
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteTextures(1, &textureCespedID);
@@ -606,12 +651,16 @@ bool processInput(bool continueApplication) {
 	if (enableCountSelected && glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
 		enableCountSelected = false;
 		modelSelected++;
-		if(modelSelected > 2)
+		if(modelSelected > 5)
 			modelSelected = 0;
 		if(modelSelected == 1)
 			fileName = "../animaciones/animation_dart_joints.txt";
 		if (modelSelected == 2)
 			fileName = "../animaciones/animation_dart.txt";
+		if (modelSelected==3)
+			fileName = "../animaciones/animation_buzz_joints.txt";
+		if (modelSelected==4)
+			fileName = "../animaciones/animation_buzz.txt";
 		std::cout << "modelSelected:" << modelSelected << std::endl;
 	}
 	else if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE)
@@ -692,6 +741,41 @@ bool processInput(bool continueApplication) {
 	else if (modelSelected == 2 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		modelMatrixDart = glm::translate(modelMatrixDart, glm::vec3(0.02, 0.0, 0.0));
 
+	//Movimientos Buzz
+	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) 
+		modelMatrixBuzz = glm::translate(modelMatrixBuzz, glm::vec3(0.0, 0.0, -0.02));
+		
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) 
+		modelMatrixBuzz = glm::translate(modelMatrixBuzz, glm::vec3(0.0, 0.0, 0.02));
+	
+	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) 
+		modelMatrixBuzz = glm::rotate(modelMatrixBuzz, 0.02f, glm::vec3(0, 1, 0));
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		modelMatrixBuzz = glm::rotate(modelMatrixBuzz, -0.02f, glm::vec3(0, 1, 0));
+	if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+		rotBuzzArmLeft += 0.02;
+	else if (modelSelected == 4 && glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS )
+		rotBuzzArmLeft -= 0.02;
+
+	//Movimiento Lara
+	if (modelSelected == 5 && glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) 
+		modelMatrixLara = glm::translate(modelMatrixLara, glm::vec3(0.0, 0.0, -0.05));
+	else if (modelSelected == 5 && glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+		modelMatrixLara = glm::translate(modelMatrixLara, glm::vec3(0.0, 0.0, 0.05));
+
+	if (modelSelected == 5 && glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) 
+		modelMatrixLara = glm::rotate(modelMatrixLara, 0.02f, glm::vec3(0, 1, 0));
+
+	else if (modelSelected == 5 && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+		modelMatrixLara = glm::rotate(modelMatrixLara, -0.02f, glm::vec3(0, 1, 0));
+	
+	if (modelSelected == 5 && (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS 
+		|| glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)) 
+		animaLara = 1;
+	else 
+		animaLara = 0;
+	
+
 	glfwPollEvents();
 	return continueApplication;
 }
@@ -721,6 +805,10 @@ void applicationLoop() {
 
 	modelMatrixMayow = glm::translate(modelMatrixMayow, glm::vec3(13.0f, 0.05f, -5.0f));
 	modelMatrixMayow = glm::rotate(modelMatrixMayow, glm::radians(-90.0f), glm::vec3(0, 1, 0));
+
+	modelMatrixCyborg = glm::translate(modelMatrixLara, glm::vec3(12, 0, -2));
+
+	modelMatrixLara = glm::translate(modelMatrixLara, glm::vec3(10, 0, -5));
 
 	// Variables to interpolation key frames
 	fileName = "../animaciones/animation_dart_joints.txt";
@@ -991,6 +1079,30 @@ void applicationLoop() {
 		// Se regresa el cull faces IMPORTANTE para la capa
 		glEnable(GL_CULL_FACE);
 
+		/*************************++++++++++++++++++
+		*BUZZ LIGHTYEAR
+		******************************************/
+		glm::mat4 modelMatrixBuzzBody = glm::mat4(modelMatrixBuzz);
+		modelMatrixBuzzBody = glm::scale(modelMatrixBuzzBody, glm::vec3(2.5));
+
+		buzzTorso.render(modelMatrixBuzzBody);
+
+		glm::mat4 modelMatrixBuzzLeftArm = glm::mat4(modelMatrixBuzzBody);
+		modelMatrixBuzzLeftArm = glm::translate(modelMatrixBuzzLeftArm, glm::vec3(0.1795, 0.5783, -0.02971));
+		modelMatrixBuzzLeftArm = glm::rotate(modelMatrixBuzzLeftArm, glm::radians(-60.0f), glm::vec3(0, 0, 1));
+		modelMatrixBuzzLeftArm = glm::rotate(modelMatrixBuzzLeftArm, rotBuzzArmLeft, glm::vec3(0, 1, 0));
+		modelMatrixBuzzLeftArm = glm::translate(modelMatrixBuzzLeftArm, glm::vec3(-0.1795, -0.5783, 0.02971));
+		buzzArmLeft.render(modelMatrixBuzzLeftArm);
+
+		glm::mat4 modelMatrixBuzzLeftForeArm = glm::mat4(modelMatrixBuzzLeftArm);
+		buzzForeArmLeft.render(modelMatrixBuzzLeftForeArm);
+
+		glm::mat4 modelMatrixLeftHand = glm::mat4(modelMatrixBuzzLeftForeArm);
+		buzzHandLeft.render(modelMatrixLeftHand);
+
+		glm::mat4 modelMatrixBuzzHead = glm::mat4(modelMatrixBuzzBody);
+		buzzHead.render(modelMatrixBuzzHead);
+
 		/*******************************************
 		 * Custom Anim objects obj
 		 *******************************************/
@@ -998,6 +1110,24 @@ void applicationLoop() {
 		modelMatrixMayowBody = glm::scale(modelMatrixMayowBody, glm::vec3(0.021, 0.021, 0.021));
 		mayowModelAnimate.setAnimationIndex(0);
 		mayowModelAnimate.render(modelMatrixMayowBody);
+
+
+		glm::mat4 modelMatrixCyborgBody = glm::mat4(modelMatrixCyborg);
+		modelMatrixCyborgBody = glm::scale(modelMatrixCyborgBody, glm::vec3(0.005));
+		modelMatrixCyborgBody = glm::translate(modelMatrixCyborgBody, glm::vec3(1.0, 0.0, 3.0));
+		cyborgModelAnimate.setAnimationIndex(0);
+		cyborgModelAnimate.render(modelMatrixCyborgBody);
+
+
+
+		/***************************
+		*Lara
+		************************/
+		glm::mat4 modelMatrixLaraBody = glm::mat4(modelMatrixLara);
+		modelMatrixLaraBody = glm::scale(modelMatrixLaraBody, glm::vec3(0.02));
+		LaraModelAnimate.setAnimationIndex(animaLara);
+		LaraModelAnimate.render(modelMatrixLaraBody);
+
 
 		/*******************************************
 		 * Skybox
